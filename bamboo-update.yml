@@ -1,0 +1,12 @@
+- hosts: bamboo-agents
+  remote_user: ubuntu
+  become: true
+
+  tasks:
+    - name: update and upgrade apt packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 86400 #One day
+        upgrade: yes
+        autoclean: yes
+        autoremove: yes

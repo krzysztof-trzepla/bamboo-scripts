@@ -1,0 +1,10 @@
+- hosts: bamboo-agents
+  remote_user: ubuntu
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: install aptitude and python packages
+      raw: |
+        apt-get update && \
+        apt-get -y install aptitude python

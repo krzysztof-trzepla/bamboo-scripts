@@ -1,0 +1,91 @@
+- hosts: bamboo-agents
+  remote_user: ubuntu
+  become: true
+
+  vars:
+    agent_jar: atlassian-bamboo-agent-installer-5.15.5.jar
+    agent_home: /home/bamboo/bamboo-agent-home
+    agent_server: https://bamboo.plgrid.pl/agentServer
+
+  tasks:
+    - name: add java repository
+      apt_repository:
+        repo: ppa:webupd8team/java
+        state: present
+
+    - name: accept oracle licence
+      debconf:
+        name: oracle-java8-installer
+        question: shared/accepted-oracle-license-v1-1
+        value: 'true'
+        vtype: select
+
+    - name: install java 8
+      apt:
+        name: oracle-java8-installer
+        state: present
+        update-cache: yes
+
+    - name: create agent groups
+      group:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - docker
+        - bamboo
+
+    - name: create agent user
+      user:
+        name: bamboo
+        group: bamboo
+        groups:
+          - docker
+          - bamboo
+        state: present
+
+    - name: download agent installer
+      get_url:
+        url: "{{ agent_server }}/agentInstaller/{{ agent_jar }}"
+        dest: "/home/bamboo/{{ agent_jar }}"
+        owner: bamboo
+        group: bamboo
+
+    - name: create agent directory
+      file:
+        path: "{{ agent_home }}"
+        owner: bamboo
+        group: bamboo
+        state: directory
+
+    - name: install agent
+      become_user: bamboo
+      raw: |
+        cd /home/bamboo && \
+        java -Dbamboo.home={{ agent_home }} \
+        -jar {{ agent_jar }} {{ agent_server }} install
+
+    - name: copy agent configuration file
+      template:
+        src: bamboo-agent.cfg.xml.j2
+        dest: "{{ agent_home }}/bamboo-agent.cfg.xml"
+        force: no
+        owner: bamboo
+        group: bamboo
+
+    - name: set agent capabilities
+      copy:
+        src: files/bamboo-capabilities.properties
+        dest: "{{ agent_home }}/bin/bamboo-capabilities.properties"
+        owner: bamboo
+        group: bamboo
+
+    - name: copy service script
+      copy:
+        src: files/bamboo-agent.service
+        dest: /etc/systemd/system/bamboo-agent.service
+
+    - name: enable and start agent service
+      systemd:
+        name: bamboo-agent
+        enabled: yes
+        state: restarted

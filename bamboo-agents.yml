@@ -1,0 +1,2 @@
+[bamboo-agents]
+bamboo-test ansible_host=149.156.11.4 ansible_port=10072 private_ip=10.6.225.61
