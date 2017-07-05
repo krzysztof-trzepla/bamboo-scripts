@@ -1,0 +1,56 @@
+- hosts: bamboo-agents
+  remote_user: ubuntu
+  become: true
+
+  vars:
+    partition_device: /dev/vdb
+    partition_number: 1
+    volume_label: storage
+    volume_path: /mnt/storage
+
+  tasks:
+    - name: create primary partition
+      parted:
+        device: "{{ partition_device }}"
+        number: "{{ partition_number }}"
+        state: present
+
+    - name: create ext4 filesystem
+      filesystem:
+        fstype: ext4
+        dev: "{{ partition_device }}{{ partition_number }}"
+        opts: "-L {{ volume_label }}"
+
+    - name: mount volume
+      mount:
+        path: "{{ volume_path }}"
+        src: LABEL=storage
+        fstype: ext4
+        state: mounted
+
+    - name: create cache directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0777
+      with_items:
+        - /mnt/storage/ccache
+        - /mnt/storage/rebar3
+        - /mnt/storage/tmp_onedata
+
+    - name: symlink cache directories
+      file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+      with_items:
+        - { src: '/mnt/storage/ccache', dest: '/var/cache/ccache' }
+        - { src: '/mnt/storage/rebar3', dest: '/var/cache/rebar3' }
+
+    - name: bind tmp directory
+      mount:
+        path: /tmp/onedata
+        src: /mnt/storage/tmp_onedata
+        fstype: none
+        opts: defaults,bind
+        state: mounted

@@ -14,12 +14,30 @@
         repo: deb https://apt.dockerproject.org/repo ubuntu-xenial main
         state: present
 
+    - name: create data directory
+      file:
+        path: /mnt/storage/docker
+        state: directory
+
+    - name: symlink data directory
+      file:
+        src: /mnt/storage/docker
+        dest: /var/lib/docker
+        state: link
+
     - name: install docker
       apt:
         name: docker-engine
         update_cache: yes
 
-    - name: restart docker service
-      service:
+    - name: copy service script
+      copy:
+        src: files/docker.service
+        dest: /etc/systemd/system/docker.service
+
+    - name: enable and start docker service
+      systemd:
         name: docker
+        enabled: yes
+        daemon_reload: yes
         state: restarted
