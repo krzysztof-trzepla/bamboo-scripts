@@ -6,7 +6,12 @@
     - name: update and upgrade apt packages
       apt:
         update_cache: yes
-        cache_valid_time: 86400 #One day
-        upgrade: yes
+        cache_valid_time: 86400 # One day
+        upgrade: dist
         autoclean: yes
         autoremove: yes
+
+    - name: reboot
+      shell: sleep 5 && reboot now
+      async: 1
+      poll: 0

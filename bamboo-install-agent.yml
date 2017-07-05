@@ -61,6 +61,8 @@
       file:
         src: /mnt/storage/bamboo-agent-home
         dest: "{{ agent_home }}"
+        owner: bamboo
+        group: bamboo
         state: link
 
     - name: install agent
