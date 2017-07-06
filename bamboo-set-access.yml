@@ -1,0 +1,18 @@
+- hosts: bamboo-agents
+  remote_user: ubuntu
+  become: true
+
+  tasks:
+    - name: copy remote user SSH authorized keys
+      copy:
+        src: files/bamboo-ssh-authorized-keys.config
+        dest: /home/ubuntu/.ssh/authorized_keys
+        owner: ubuntu
+        group: ubuntu
+
+    - name: copy agent SSH authorized keys
+      copy:
+        src: files/bamboo-ssh-authorized-keys.config
+        dest: /home/bamboo/.ssh/authorized_keys
+        owner: bamboo
+        group: bamboo

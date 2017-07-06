@@ -1,0 +1,26 @@
+- hosts: bamboo-agents
+  remote_user: ubuntu
+  become: true
+
+  tasks:
+    - name: remove docker containers
+      shell: docker rm -vf $(docker ps -aq) || true
+
+    - name: remove dangling docker images
+      shell: docker rmi $(docker images -f dangling=true -q) || true
+
+    - name: remove temporary docker images
+      shell: |
+        docker images | grep "tmp_" | awk '{print $1}' | xargs docker rmi \
+        || true
+
+    - name: remove dangling docker volumes
+      shell: docker volume rm $(docker volume ls -f dangling=true -q) || true
+
+    - name: remove temporary files
+      file:
+        path: "{{ item }}/*"
+        state: absent
+      with_items:
+        - /home/bamboo/bamboo-agent-home/xml-data/build-dir
+        - /tmp/onedata

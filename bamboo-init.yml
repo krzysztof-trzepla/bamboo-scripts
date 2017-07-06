@@ -7,4 +7,9 @@
     - name: install aptitude and python packages
       raw: |
         apt-get update && \
-        apt-get -y install aptitude python
+        apt-get -y install aptitude build-essential libffi-dev \
+                           libssl-dev python python-dev \
+                           python-setuptools
+
+    - name: install python modules
+      shell: easy_install paramiko requests scp

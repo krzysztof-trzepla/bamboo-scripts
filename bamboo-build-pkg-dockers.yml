@@ -1,0 +1,20 @@
+- hosts: bamboo-agents
+  remote_user: bamboo
+
+  tasks:
+    - name: clone dockers-devel repository
+      git:
+        repo: ssh://git@git.plgrid.pl:7999/vfs/dockers-devel.git
+        dest: /home/bamboo/dockers-devel
+        force: yes
+        accept_hostkey: yes
+
+    - name: make DEB builders
+      local_action: |
+        shell ssh -p {{ ansible_port }} -tt bamboo@{{ ansible_host }} \
+        make -C dockers-devel deb_builder
+
+    - name: make RPM builders
+      local_action: |
+        shell ssh -p {{ ansible_port }} -tt bamboo@{{ ansible_host }} \
+        make -C dockers-devel rpm_builder

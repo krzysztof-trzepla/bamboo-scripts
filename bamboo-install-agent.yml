@@ -41,7 +41,51 @@
         groups:
           - docker
           - bamboo
+        shell: /bin/bash
         state: present
+
+    - name: create agent SSH directory
+      file:
+        path: /home/bamboo/.ssh
+        owner: bamboo
+        group: bamboo
+        state: directory
+
+    - name: copy agent SSH key
+      copy:
+        src: files/bamboo-ssh.key
+        dest: /home/bamboo/.ssh/id_rsa
+        owner: bamboo
+        group: bamboo
+        mode: 0600
+
+    - name: copy agent SSH config
+      copy:
+        src: files/bamboo-ssh.config
+        dest: /home/bamboo/.ssh/config
+        owner: bamboo
+        group: bamboo
+
+    - name: copy agent SSH authorized keys
+      copy:
+        src: files/bamboo-ssh-authorized-keys.config
+        dest: /home/bamboo/.ssh/authorized_keys
+        owner: bamboo
+        group: bamboo
+
+    - name: create agent docker config directory
+      file:
+        path: /home/bamboo/.docker
+        owner: bamboo
+        group: bamboo
+        state: directory
+
+    - name: copy agent docker config
+      copy:
+        src: files/bamboo-docker.config
+        dest: /home/bamboo/.docker/config.json
+        owner: bamboo
+        group: bamboo
 
     - name: download agent installer
       get_url:
@@ -66,11 +110,13 @@
         state: link
 
     - name: install agent
-      become_user: bamboo
-      raw: |
-        cd /home/bamboo && \
+      remote_user: bamboo
+      become: false
+      shell: |
         java -Dbamboo.home={{ agent_home }} \
         -jar {{ agent_jar }} {{ agent_server }} install
+      args:
+        creates: "{{ agent_home }}/bin"
 
     - name: copy agent configuration file
       template:
