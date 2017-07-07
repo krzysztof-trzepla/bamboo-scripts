@@ -9,3 +9,9 @@ bamboo-agent07 ansible_host=149.156.11.4 ansible_port=10312 private_ip=10.6.225.
 bamboo-agent08 ansible_host=149.156.11.4 ansible_port=10313 private_ip=10.6.225.72
 bamboo-agent09 ansible_host=149.156.11.4 ansible_port=10315 private_ip=10.6.225.73
 bamboo-agent10 ansible_host=149.156.11.4 ansible_port=10074 private_ip=10.6.225.74
+bamboo-agent11 ansible_host=149.156.11.4 ansible_port=10067 private_ip=10.6.225.75
+bamboo-agent12 ansible_host=149.156.11.4 ansible_port=10064 private_ip=10.6.225.76
+bamboo-agent13 ansible_host=149.156.11.4 ansible_port=10070 private_ip=10.6.225.77
+bamboo-agent14 ansible_host=149.156.11.4 ansible_port=10071 private_ip=10.6.225.78
+bamboo-agent15 ansible_host=149.156.11.4 ansible_port=10081 private_ip=10.6.225.79
+bamboo-agent16 ansible_host=149.156.11.4 ansible_port=10131 private_ip=10.6.225.80
