@@ -1,0 +1,56 @@
+- hosts: bamboo-agents
+  remote_user: ubuntu
+  gather_facts: false
+  become: true
+
+  vars:
+    download_dir: /home/ubuntu/kernel/
+
+  tasks:
+    - name: remove download directory
+      file:
+        path: "{{ download_dir }}"
+        state: absent
+
+    - name: create download directory
+      file:
+        path: "{{ download_dir }}"
+        owner: ubuntu
+        group: ubuntu
+        state: directory
+
+    - name: download kernel packages
+      get_url:
+        url: "{{ item }}"
+        dest: "{{ download_dir }}"
+        owner: ubuntu
+        group: ubuntu
+      with_items:
+        - http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.4.78/linux-headers-4.4.78-040478_4.4.78-040478.201707210237_all.deb
+        - http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.4.78/linux-headers-4.4.78-040478-generic_4.4.78-040478.201707210237_amd64.deb
+        - http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.4.78/linux-image-4.4.78-040478-generic_4.4.78-040478.201707210237_amd64.deb
+
+    - name: install kernel packages
+      shell: "dpkg -i *.deb"
+      args:
+        chdir: "{{ download_dir }}"
+
+    - name: stop docker service
+      systemd:
+        name: docker
+        state: stopped
+
+    - name: remove docker directory
+      file:
+        path: /mnt/storage/docker
+        state: absent
+
+    - name: create docker directory
+      file:
+        path: /mnt/storage/docker
+        state: directory
+
+    - name: reboot
+      shell: sleep 5 && reboot now
+      async: 1
+      poll: 0
