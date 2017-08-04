@@ -1,5 +1,6 @@
 - hosts: bamboo-agents
   remote_user: ubuntu
+  gather_facts: false
   become: true
 
   tasks:
@@ -18,9 +19,7 @@
       shell: docker volume rm $(docker volume ls -f dangling=true -q) || true
 
     - name: remove temporary files
-      file:
-        path: "{{ item }}/*"
-        state: absent
+      shell: "rm -rf {{ item }}/*"
       with_items:
         - /home/bamboo/bamboo-agent-home/xml-data/build-dir
         - /tmp/onedata

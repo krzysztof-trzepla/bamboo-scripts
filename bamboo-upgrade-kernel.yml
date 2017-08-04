@@ -40,15 +40,8 @@
         name: docker
         state: stopped
 
-    - name: remove docker directory
-      file:
-        path: /mnt/storage/docker
-        state: absent
-
-    - name: create docker directory
-      file:
-        path: /mnt/storage/docker
-        state: directory
+    - name: remove docker directory contents
+      shell: "rm -rf /mnt/storage/docker/*"
 
     - name: reboot
       shell: sleep 5 && reboot now
